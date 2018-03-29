@@ -359,7 +359,8 @@ $(function () {
 						1: 'MP 4',
 						2: 'OGG',
 						3: 'Twitch Clip',
-						4: 'YouTube'
+						4: 'YouTube',
+						5: 'test'
 					}
 				});
 				addField({
