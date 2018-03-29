@@ -379,6 +379,9 @@ $(function () {
 					if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
 						type = 3;
 					}
+					if (type === 0 && link.indexOf('youtube.com/') >= 0) {
+						type = 4;
+					}
 
 					if (type === 0) {
 						encType = link.substr(link.length - 3);
@@ -391,7 +394,6 @@ $(function () {
 					}
 					else if (type === 3) {
 						var twitchPosition = link.indexOf('twitch.tv/');
-						alert(twitchPosition);
 						if (twitchPosition >= 0) {
 							link = link.substr(twitchPosition + 'twitch.tv/'.length);
 						}
@@ -399,7 +401,6 @@ $(function () {
 						return '[twitch-clip]' + link + '[/twitch-clip]';
 					}else if (type === 4) {
 						var youtubePosition = link.indexOf('youtube.com/');
-						alert(youtubePosition);
 						if (youtubePosition >= 0) {
 							link = link.substr(youtubePosition + 'youtube.com/'.length);
 						}
