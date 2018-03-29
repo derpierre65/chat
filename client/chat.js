@@ -93,6 +93,7 @@ $(function () {
 		str     = str.replace(/\[u\](.+?)\[\/u\]/g, '<u>$1</u>');
 		str     = str.replace(/\[i\](.+?)\[\/i\]/g, '<i>$1</i>');
 		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
+		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
 		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<img src="$1" style="max-width: 300px;" />');
 		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
 
@@ -136,6 +137,16 @@ $(function () {
 
 		$('#status').removeClass(rC).addClass(aC).html(text);
 	}
+
+    function urlParam(param,name){
+        var results = new RegExp('[\?&]' + param + '=([^&#]*)').exec(name);
+        if (results==null){
+            return null;
+        }
+        else{
+            return decodeURI(results[1]) || 0;
+        }
+    }
 
 	socket
 		.on('connect', function () {
@@ -347,7 +358,8 @@ $(function () {
 						0: 'Automatisch',
 						1: 'MP 4',
 						2: 'OGG',
-						3: 'Twitch Clip (coming soon)'
+						3: 'Twitch Clip',
+						4: 'YouTube'
 					}
 				});
 				addField({
@@ -385,6 +397,14 @@ $(function () {
 						}
 
 						return '[twitch-clip]' + link + '[/twitch-clip]';
+					}else if (type === 4) {
+						var youtubePosition = link.indexOf('youtube.com/');
+						alert(youtubePosition);
+						if (youtubePosition >= 0) {
+							link = link.substr(youtubePosition + 'youtube.com/'.length);
+						}
+
+						return '[youtube]' + urlParam('v',link) + '[/youtube]';
 					}
 
 					return '[video=' + encType + ']' + link + '[/video]';
