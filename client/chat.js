@@ -274,146 +274,156 @@ $(function () {
 			dl.append($('<dd />').append($element));
 		};
 
-		switch (bbcode) {
-			case 'italic':
-			case 'under':
-			case 'crossed':
-			case 'bold': {
-				addField({
-					title: 'Text',
-					name: 'text',
-					type: 'text'
-				});
+        bbcodeMethod(bbcode);
 
-				// get tag name
-				var tag = 'b';
-				switch (bbcode) {
-					case 'italic':
-						tag = 'i';
-						break;
-					case 'crossed':
-						tag = 's';
-						break;
-					case 'under':
-						tag = 'u';
-						break;
-				}
+        function bbcodeMethod(bbcode) {
+            switch (bbcode) {
+                case 'italic':
+                case 'under':
+                case 'crossed':
+                case 'bold': {
+                    addField({
+                        title: 'Text',
+                        name: 'text',
+                        type: 'text'
+                    });
 
-				modalFunction = function () {
-					return '[' + tag + ']' + $('#bbcode-input-text').val() + '[/' + tag + ']';
-				};
+                    // get tag name
+                    var tag = 'b';
+                    switch (bbcode) {
+                        case 'italic':
+                            tag = 'i';
+                            break;
+                        case 'crossed':
+                            tag = 's';
+                            break;
+                        case 'under':
+                            tag = 'u';
+                            break;
+                    }
 
-				break;
-			}
-			case 'img': {
-				addField({
-					title: 'Link des Bildes',
-					name: 'imageurl',
-					type: 'text'
-				});
+                    modalFunction = function () {
+                        return '[' + tag + ']' + $('#bbcode-input-text').val() + '[/' + tag + ']';
+                    };
 
-				modalFunction = function () {
-					var link = $('#bbcode-input-imageurl').val();
-					if (!link.length) {
-						return false;
-					}
+                    break;
+                }
+                case 'img': {
+                    addField({
+                        title: 'Link des Bildes',
+                        name: 'imageurl',
+                        type: 'text'
+                    });
 
-					return '[img]' + link + '[/img]';
-				};
-				break;
-			}
-			case 'url': {
-				addField({
-					title: 'Anzeigetext (optional)',
-					name: 'showtext',
-					type: 'text'
-				});
-				addField({
-					title: 'Link',
-					name: 'link',
-					type: 'text'
-				});
+                    modalFunction = function () {
+                        var link = $('#bbcode-input-imageurl').val();
+                        if (!link.length) {
+                            return false;
+                        }
 
-				modalFunction = function () {
-					var showtext = $('#bbcode-input-showtext').val().trim();
-					var link     = $('#bbcode-input-link').val().trim();
-					if (!link.length) {
-						return false;
-					}
+                        return '[img]' + link + '[/img]';
+                    };
+                    break;
+                }
+                case 'url': {
+                    addField({
+                        title: 'Anzeigetext (optional)',
+                        name: 'showtext',
+                        type: 'text'
+                    });
+                    addField({
+                        title: 'Link',
+                        name: 'link',
+                        type: 'text'
+                    });
 
-					if (showtext.length) {
-						return '[url=' + link + ']' + showtext + '[/url]';
-					}
+                    modalFunction = function () {
+                        var showtext = $('#bbcode-input-showtext').val().trim();
+                        var link     = $('#bbcode-input-link').val().trim();
+                        if (!link.length) {
+                            return false;
+                        }
+                        if (link.indexOf('twitch.tv/') >= 0) {
+                            bbcodeMethod('video');
+                        }
+                        if ( link.indexOf('youtube.com/') >= 0) {
+                            bbcodeMethod('video');
+                        }
+                        if (showtext.length) {
+                            return '[url=' + link + ']' + showtext + '[/url]';
+                        }
 
-					return '[url]' + link + '[/url]';
-				};
-				break;
-			}
-			case 'video': {
-				addField({
-					title: 'Typ (optional)',
-					name: 'type',
-					type: 'select',
-					options: {
-						0: 'Automatisch',
-						1: 'MP 4',
-						2: 'OGG',
-						3: 'Twitch Clip',
-						4: 'YouTube'
-					}
-				});
-				addField({
-					title: 'Link',
-					name: 'link',
-					type: 'text'
-				});
+                        return '[url]' + link + '[/url]';
+                    };
+                    break;
+                }
+                case 'video': {
+                    addField({
+                        title: 'Typ (optional)',
+                        name: 'type',
+                        type: 'select',
+                        options: {
+                            0: 'Automatisch',
+                            1: 'MP 4',
+                            2: 'OGG',
+                            3: 'Twitch Clip',
+                            4: 'YouTube'
+                        }
+                    });
+                    addField({
+                        title: 'Link',
+                        name: 'link',
+                        type: 'text'
+                    });
 
-				modalFunction = function () {
-					var link    = $('#bbcode-input-link').val().trim();
-					var type    = parseInt($('#bbcode-input-type').val());
-					var encType = '';
-					if (!link.length) {
-						return false;
-					}
+                    modalFunction = function () {
+                        var link    = $('#bbcode-input-link').val().trim();
+                        var type    = parseInt($('#bbcode-input-type').val());
+                        var encType = '';
+                        if (!link.length) {
+                            return false;
+                        }
 
-					if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
-						type = 3;
-					}
-					if (type === 0 && link.indexOf('youtube.com/') >= 0) {
-						type = 4;
-					}
+                        if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
+                            type = 3;
+                        }
+                        if (type === 0 && link.indexOf('youtube.com/') >= 0) {
+                            type = 4;
+                        }
 
-					if (type === 0) {
-						encType = link.substr(link.length - 3);
-					}
-					else if (type === 1) {
-						encType = 'mp4';
-					}
-					else if (type === 2) {
-						encType = 'ogg';
-					}
-					else if (type === 3) {
-						var twitchPosition = link.indexOf('twitch.tv/');
-						if (twitchPosition >= 0) {
-							link = link.substr(twitchPosition + 'twitch.tv/'.length);
-						}
+                        if (type === 0) {
+                            encType = link.substr(link.length - 3);
+                        }
+                        else if (type === 1) {
+                            encType = 'mp4';
+                        }
+                        else if (type === 2) {
+                            encType = 'ogg';
+                        }
+                        else if (type === 3) {
+                            var twitchPosition = link.indexOf('twitch.tv/');
+                            if (twitchPosition >= 0) {
+                                link = link.substr(twitchPosition + 'twitch.tv/'.length);
+                            }
 
-						return '[twitch-clip]' + link + '[/twitch-clip]';
-					}else if (type === 4) {
-						var youtubePosition = link.indexOf('youtube.com/');
-						if (youtubePosition >= 0) {
-							link = link.substr(youtubePosition + 'youtube.com/'.length);
-						}
+                            return '[twitch-clip]' + link + '[/twitch-clip]';
+                        }else if (type === 4) {
+                            var youtubePosition = link.indexOf('youtube.com/');
+                            if (youtubePosition >= 0) {
+                                link = link.substr(youtubePosition + 'youtube.com/'.length);
+                            }
 
-						return '[youtube]' + urlParam('v',link) + '[/youtube]';
-					}
+                            return '[youtube]' + urlParam('v',link) + '[/youtube]';
+                        }
 
-					return '[video=' + encType + ']' + link + '[/video]';
-				};
+                        return '[video=' + encType + ']' + link + '[/video]';
+                    };
 
-				break;
-			}
-		}
+                    break;
+                }
+            }
+        }
+
 
 		$('.modal-title').html(bbcode);
 		$('.modal-body').html(dl);
