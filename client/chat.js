@@ -92,11 +92,12 @@ $(function () {
 		str     = str.replace(/\[url=(.+?)\](.+?)\[\/url\]/g, '<a target="_blank" href="$1">$2</a>');
 		str     = str.replace(/\[u\](.+?)\[\/u\]/g, '<u>$1</u>');
 		str     = str.replace(/\[i\](.+?)\[\/i\]/g, '<i>$1</i>');
-		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
-		str     = str.replace(/\[twitch-video\](.+?)\[\/twitch-video\]/g, '<iframe src="https://player.twitch.tv/?autoplay=false&video=v$1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="640"></iframe>');
-		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
-		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<img src="$1" style="max-width: 300px;" />');
-		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
+		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<br/><iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
+		str     = str.replace(/\[twitch-video\](.+?)\[\/twitch-video\]/g, '<br/><iframe src="https://player.twitch.tv/?autoplay=false&video=v$1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="640"></iframe>');
+		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<br/><iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
+		str     = str.replace(/\[spotify\](.+?)\[\/spotify\]/g, '<br/><iframe src="https://open.spotify.com/embed/track/$1" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>');
+		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<br/><img src="$1" style="max-width: 300px;" />');
+		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<br/><video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
 
 		// <video width="320" height="240" controls>
 		// <source src="movie.mp4" type="video/mp4">
@@ -348,16 +349,18 @@ $(function () {
                         if (!link.length) {
                             return false;
                         }
-                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)) {
+                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)|| inHaystack('open.spotify.com/track/',link)) {
                             if ( link.indexOf('twitch.tv/') >= 0) {
                                 type = 3;
                             } else if ( link.indexOf('youtube.com/') >= 0) {
                                 type = 4;
+                            } else if ( inHaystack('open.spotify.com/track/',link)) {
+                                type = 5;
                             } else {
                             	type = 0;
 							}
 
-                            return videoBBCode(link,type);
+                            return mediaBBCode(link,type);
                         }
                         if (showtext.length) {
                             return '[url=' + link + ']' + showtext + '[/url]';
@@ -399,7 +402,10 @@ $(function () {
                         if (type === 0 && link.indexOf('youtube.com/') >= 0) {
                             type = 4;
                         }
-                        return videoBBCode(link,type);
+                        if ( inHaystack('open.spotify.com/track/',link)) {
+                            type = 5;
+                        }
+                        return mediaBBCode(link,type);
 
                     };
 
@@ -414,11 +420,14 @@ $(function () {
 		$('.modal').modal();
 	});
 
-	function videoBBCode(link,type) {
+	function mediaBBCode(link,type) {
         if (type === 0) {
             encType = link.substr(link.length - 3);
             if(encType = 'ebm') {
-                encType = 'webm';
+                encTypetemp = link.substr(link.length - 4);
+                if(encTypetemp = '.webm') {
+                    encType = 'webm';
+				}
             }
         }
         else if (type === 1) {
@@ -445,6 +454,13 @@ $(function () {
             }
 
             return '[youtube]' + urlParam('v',link) + '[/youtube]';
+        }else if (type === 5) {
+            var spotifyPosition = link.indexOf('open.spotify.com/track/');
+            if (spotifyPosition >= 0) {
+                link = link.substr(spotifyPosition + 'open.spotify.com/track/'.length);
+            }
+
+            return '[spotify]' + link + '[/spotify]';
         }
 
         return '[video=' + encType + ']' + link + '[/video]';

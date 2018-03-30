@@ -6,14 +6,14 @@
 </head>
 <!--<body onmouseover="changeStatus(true);" onmouseout="changeStatus(false);">-->
 <body>
-<div id="status-info">
-	Server Status: <span id="status" class="offline">Offline</span><br>
-</div>
 <div id="master-wrapper">
 	<div id="chat-area">
 		<div id="content"></div>
 		<div id="users-online"></div>
 	</div>
+    <div id="status-info">
+        Server Status: <span id="status" class="offline">Offline</span><br>
+    </div>
 	<div id="bb-flex">
 		<div class="bb-button" id="bb-bold">Bold</div>
 		<div class="bb-button" id="bb-italic">Italic</div>
