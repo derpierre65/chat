@@ -340,14 +340,19 @@ $(function () {
                     modalFunction = function () {
                         var showtext = $('#bbcode-input-showtext').val().trim();
                         var link     = $('#bbcode-input-link').val().trim();
+                        var type = '';
+                        var encType = '';
                         if (!link.length) {
                             return false;
                         }
-                        if (link.indexOf('twitch.tv/') >= 0) {
-                            bbcodeMethod('video');
-                        }
-                        if ( link.indexOf('youtube.com/') >= 0) {
-                            bbcodeMethod('video');
+                        if (link.indexOf('twitch.tv/') >= 0 || link.indexOf('youtube.com/') >= 0) {
+                            if ( link.indexOf('twitch.tv/') >= 0) {
+                                type = 3;
+                            }
+                            if ( link.indexOf('youtube.com/') >= 0) {
+                                type = 4;
+                            }
+                            return videoBBCode(link,type,encType);
                         }
                         if (showtext.length) {
                             return '[url=' + link + ']' + showtext + '[/url]';
@@ -390,33 +395,8 @@ $(function () {
                         if (type === 0 && link.indexOf('youtube.com/') >= 0) {
                             type = 4;
                         }
+                        return videoBBCode(link,type,encType);
 
-                        if (type === 0) {
-                            encType = link.substr(link.length - 3);
-                        }
-                        else if (type === 1) {
-                            encType = 'mp4';
-                        }
-                        else if (type === 2) {
-                            encType = 'ogg';
-                        }
-                        else if (type === 3) {
-                            var twitchPosition = link.indexOf('twitch.tv/');
-                            if (twitchPosition >= 0) {
-                                link = link.substr(twitchPosition + 'twitch.tv/'.length);
-                            }
-
-                            return '[twitch-clip]' + link + '[/twitch-clip]';
-                        }else if (type === 4) {
-                            var youtubePosition = link.indexOf('youtube.com/');
-                            if (youtubePosition >= 0) {
-                                link = link.substr(youtubePosition + 'youtube.com/'.length);
-                            }
-
-                            return '[youtube]' + urlParam('v',link) + '[/youtube]';
-                        }
-
-                        return '[video=' + encType + ']' + link + '[/video]';
                     };
 
                     break;
@@ -429,6 +409,39 @@ $(function () {
 		$('.modal-body').html(dl);
 		$('.modal').modal();
 	});
+
+	function videoBBCode(link,type,enctype) {
+		console.log(link);
+		console.log(type);
+		console.log(enctype);
+        if (type === 0) {
+            encType = link.substr(link.length - 3);
+        }
+        else if (type === 1) {
+            encType = 'mp4';
+        }
+        else if (type === 2) {
+            encType = 'ogg';
+        }
+        else if (type === 3) {
+            var twitchPosition = link.indexOf('twitch.tv/');
+            if (twitchPosition >= 0) {
+                link = link.substr(twitchPosition + 'twitch.tv/'.length);
+            }
+
+            return '[twitch-clip]' + link + '[/twitch-clip]';
+        }else if (type === 4) {
+            var youtubePosition = link.indexOf('youtube.com/');
+            if (youtubePosition >= 0) {
+                link = link.substr(youtubePosition + 'youtube.com/'.length);
+            }
+
+            return '[youtube]' + urlParam('v',link) + '[/youtube]';
+        }
+
+        return '[video=' + encType + ']' + link + '[/video]';
+	}
+
 	$('.btn-paste').on('click', function () {
 		var text = modalFunction();
 		if (text !== false) {
