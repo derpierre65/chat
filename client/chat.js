@@ -95,7 +95,7 @@ $(function () {
 		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<br/><iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
 		str     = str.replace(/\[twitch-video\](.+?)\[\/twitch-video\]/g, '<br/><iframe src="https://player.twitch.tv/?autoplay=false&video=v$1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="640"></iframe>');
 		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<br/><iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
-		str     = str.replace(/\[spotify\](.+?)\[\/spotify\]/g, '<br/><iframe src="https://open.spotify.com/embed/track/$1" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>');
+		str     = str.replace(/\[spotify\](.+?)\[\/spotify\]/g, '<br/><iframe src="https://open.spotify.com/embed/$1" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>');
 		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<br/><img src="$1" style="max-width: 300px;" />');
 		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<br/><video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
 
@@ -349,13 +349,14 @@ $(function () {
                         if (!link.length) {
                             return false;
                         }
-                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)|| inHaystack('open.spotify.com/track/',link)) {
+                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)|| inHaystack('open.spotify.com/',link)) {
                             if ( link.indexOf('twitch.tv/') >= 0) {
                                 type = 3;
                             } else if ( link.indexOf('youtube.com/') >= 0) {
                                 type = 4;
-                            } else if ( inHaystack('open.spotify.com/track/',link)) {
+                            } else if ( inHaystack('open.spotify.com/',link)) {
                                 type = 5;
+                                alert('right');
                             } else {
                             	type = 0;
 							}
@@ -402,7 +403,7 @@ $(function () {
                         if (type === 0 && link.indexOf('youtube.com/') >= 0) {
                             type = 4;
                         }
-                        if ( inHaystack('open.spotify.com/track/',link)) {
+                        if ( inHaystack('open.spotify.com/',link)) {
                             type = 5;
                         }
                         return mediaBBCode(link,type);
@@ -455,9 +456,9 @@ $(function () {
 
             return '[youtube]' + urlParam('v',link) + '[/youtube]';
         }else if (type === 5) {
-            var spotifyPosition = link.indexOf('open.spotify.com/track/');
+            var spotifyPosition = link.indexOf('open.spotify.com/');
             if (spotifyPosition >= 0) {
-                link = link.substr(spotifyPosition + 'open.spotify.com/track/'.length);
+                link = link.substr(spotifyPosition + 'open.spotify.com/'.length);
             }
 
             return '[spotify]' + link + '[/spotify]';
@@ -473,7 +474,6 @@ $(function () {
 			return false;
 		}
 	}
-
 	$('.btn-paste').on('click', function () {
 		var text = modalFunction();
 		if (text !== false) {
