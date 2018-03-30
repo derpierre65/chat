@@ -93,6 +93,7 @@ $(function () {
 		str     = str.replace(/\[u\](.+?)\[\/u\]/g, '<u>$1</u>');
 		str     = str.replace(/\[i\](.+?)\[\/i\]/g, '<i>$1</i>');
 		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
+		str     = str.replace(/\[twitch-video\](.+?)\[\/twitch-video\]/g, '<iframe src="https://player.twitch.tv/?autoplay=false&video=v$1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="640"></iframe>');
 		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
 		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<img src="$1" style="max-width: 300px;" />');
 		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
@@ -341,18 +342,22 @@ $(function () {
                         var showtext = $('#bbcode-input-showtext').val().trim();
                         var link     = $('#bbcode-input-link').val().trim();
                         var type = '';
-                        var encType = '';
+                        var encTypeDetect = link.substr(link.length - 4);
+                        var vidArray = ['webm', '.mp4', '.ogg'];
+                        var isEncVideo = inHaystack(encTypeDetect,vidArray);
                         if (!link.length) {
                             return false;
                         }
-                        if (link.indexOf('twitch.tv/') >= 0 || link.indexOf('youtube.com/') >= 0) {
+                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)) {
                             if ( link.indexOf('twitch.tv/') >= 0) {
                                 type = 3;
-                            }
-                            if ( link.indexOf('youtube.com/') >= 0) {
+                            } else if ( link.indexOf('youtube.com/') >= 0) {
                                 type = 4;
-                            }
-                            return videoBBCode(link,type,encType);
+                            } else {
+                            	type = 0;
+							}
+
+                            return videoBBCode(link,type);
                         }
                         if (showtext.length) {
                             return '[url=' + link + ']' + showtext + '[/url]';
@@ -384,7 +389,6 @@ $(function () {
                     modalFunction = function () {
                         var link    = $('#bbcode-input-link').val().trim();
                         var type    = parseInt($('#bbcode-input-type').val());
-                        var encType = '';
                         if (!link.length) {
                             return false;
                         }
@@ -395,7 +399,7 @@ $(function () {
                         if (type === 0 && link.indexOf('youtube.com/') >= 0) {
                             type = 4;
                         }
-                        return videoBBCode(link,type,encType);
+                        return videoBBCode(link,type);
 
                     };
 
@@ -410,12 +414,12 @@ $(function () {
 		$('.modal').modal();
 	});
 
-	function videoBBCode(link,type,enctype) {
-		console.log(link);
-		console.log(type);
-		console.log(enctype);
+	function videoBBCode(link,type) {
         if (type === 0) {
             encType = link.substr(link.length - 3);
+            if(encType = 'ebm') {
+                encType = 'webm';
+            }
         }
         else if (type === 1) {
             encType = 'mp4';
@@ -426,6 +430,10 @@ $(function () {
         else if (type === 3) {
             var twitchPosition = link.indexOf('twitch.tv/');
             if (twitchPosition >= 0) {
+            	if(link.indexOf('twitch.tv/videos/')) {
+                    link = link.substr(twitchPosition + 'twitch.tv/videos/'.length);
+                    return '[twitch-video]' + link + '[/twitch-video]';
+				}
                 link = link.substr(twitchPosition + 'twitch.tv/'.length);
             }
 
@@ -440,6 +448,14 @@ $(function () {
         }
 
         return '[video=' + encType + ']' + link + '[/video]';
+	}
+
+	function inHaystack(needle,haystack) {
+		if(haystack.indexOf(needle) >= 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	$('.btn-paste').on('click', function () {
