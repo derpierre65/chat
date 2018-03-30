@@ -7,7 +7,7 @@
 <!--<body onmouseover="changeStatus(true);" onmouseout="changeStatus(false);">-->
 <body>
 <div id="status-info">
-	Server Status: <span id="status" class="online">Online</span><br>
+	Server Status: <span id="status" class="offline">Offline</span><br>
 </div>
 <div id="master-wrapper">
 	<div id="chat-area">
