@@ -356,7 +356,6 @@ $(function () {
                                 type = 4;
                             } else if ( inHaystack('open.spotify.com/',link)) {
                                 type = 5;
-                                alert('right');
                             } else {
                             	type = 0;
 							}
