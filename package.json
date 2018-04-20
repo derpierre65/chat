@@ -16,6 +16,11 @@
   },
   "homepage": "https://github.com/derpierre65/chat#readme",
   "dependencies": {
-    "md5": "^2.2.1"
+    "colors": "^1.2.1",
+    "md5": "^2.2.1",
+    "readline-sync": "^1.4.9",
+    "request": "^2.85.0",
+    "sha256": "^0.2.0",
+    "socket.io": "^2.1.0"
   }
 }

@@ -1,0 +1,19 @@
+{
+	"staging": {
+		"port": 3666,
+		"ssl": {
+			"key": "/etc/letsencrypt/live/chat.derpierre65.de/privkey.pem",
+			"cert": "/etc/letsencrypt/live/chat.derpierre65.de/fullchain.pem"
+		}
+	},
+	"dev": {
+		"port": 3667,
+		"ssl": {
+			"key": "/etc/letsencrypt/live/dev.chat.derpierre65.de/privkey.pem",
+			"cert": "/etc/letsencrypt/live/dev.chat.derpierre65.de/fullchain.pem"
+		}
+	},
+	"local": {
+		"port": 3668
+	}
+}

@@ -1,2 +1,4 @@
 node_modules/
 .idea/
+server/users.json
+emotes.json

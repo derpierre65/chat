@@ -1,83 +1,149 @@
-var md5         = require('md5');
-var util        = require('util');
-var fs          = require('fs');
-var https       = require('https');
-var httpsServer = https.createServer({
-	    key: fs.readFileSync('/etc/letsencrypt/live/chat.derpierre65.de/privkey.pem'),
-	    cert: fs.readFileSync('/etc/letsencrypt/live/chat.derpierre65.de/fullchain.pem')
-    }),
-    io          = require('socket.io').listen(httpsServer);
+var md5          = require('md5');
+var util         = require('util');
+var fs           = require('fs');
+var sha256       = require('sha256');
+var colors       = require('colors');
+var request      = require('request');
+var readlineSync = require('readline-sync');
+var io;
+
+if (util.isUndefined(process.argv[2])) {
+	console.log('Missing argument, use in exapmle: "node server.js staging", key must exists in config.json');
+	process.exit();
+}
+var Config = require('./../config')[process.argv[2]];
+if (!util.isObject(Config)) {
+	console.log('Missing config for', process.argv[2]);
+	process.exit();
+}
+
+// HTTPS
+if (util.isObject(Config.ssl)) {
+	var https       = require('https');
+	var httpsServer = https.createServer({
+		key: fs.readFileSync(Config.ssl.key),
+		cert: fs.readFileSync(Config.ssl.cert)
+	});
+
+	io = require('socket.io').listen(httpsServer);
+	httpsServer.listen(Config.port, '0.0.0.0');
+}
+// HTTP
+else {
+	io = require('socket.io')(Config.port);
+}
 
 var savedMessages = [];
 var usernames     = {};
-var request       = require('request');
 var twitchEmotes  = {};
 
+console.log('[Twitch Emotes] Load from emotes.json...');
 if (fs.existsSync(__dirname + '/../emotes.json')) {
 	twitchEmotes = require(__dirname + '/../emotes.json');
-	console.log('emotes loaded!');
+	console.log(colors.green('[Twitch Emotes] Loaded Twitch Emotes from emotes.json'));
 }
 else {
-	console.log('scan emotes');
+	console.log('[Twitch Emotes] Fetch Twitch Emotes from twitchemotes.com...');
 	request('https://twitchemotes.com/api_cache/v3/global.json', function (error, response, body) {
 		if (error) {
-			console.log('Failed to get twitch emotes');
-			return;
+			console.log(colors.red('[Twitch Emotes] Failed to fetch global emotes from twitchemotes.com'));
 		}
-
-		var twitchGlobalEmotes = JSON.parse(body);
-		Object.keys(twitchGlobalEmotes).forEach(function (emote) {
-			twitchEmotes[emote] = {
-				twitch: true,
-				id: twitchGlobalEmotes[emote].id
-			};
-		});
+		else {
+			try {
+				var twitchGlobalEmotes = JSON.parse(body);
+				Object.keys(twitchGlobalEmotes).forEach(function (emote) {
+					twitchEmotes[emote] = {
+						twitch: true,
+						id: twitchGlobalEmotes[emote].id
+					};
+				});
+			}
+			catch (e) {
+				console.log(colors.red('[Twitch Emotes] Failed to fetch global emotes from twitchemotes.com'));
+			}
+		}
 
 		request('https://api.betterttv.net/2/emotes', function (error, response, body) {
 			if (error) {
-				console.log('failed get bettertv emotes');
-				return;
+				console.log(colors.red('[Twitch Emotes] Failed to fetch emotes from Better Twitch TV'));
 			}
-
-			var bttvEmotes = JSON.parse(body);
-			bttvEmotes.emotes.forEach(function (emote) {
-				twitchEmotes[emote.code] = {
-					bttv: true,
-					id: emote.id
-				};
-			});
-
-			request('https://twitchemotes.com/api_cache/v3/subscriber.json', function (error, response, body) {
-				if (error) {
-					console.log('failed get subscriber emotes');
-					return;
-				}
-				/** @type {{emotes: []}} */
-				var subEmotes = JSON.parse(body);
-				Object.keys(subEmotes).forEach(function (key) {
-					subEmotes[key].emotes.forEach(function (emote) {
+			else {
+				try {
+					var bttvEmotes = JSON.parse(body);
+					bttvEmotes.emotes.forEach(function (emote) {
 						twitchEmotes[emote.code] = {
-							twitch: true,
+							bttv: true,
 							id: emote.id
 						};
 					});
-				});
+				}
+				catch (e) {
+					console.log(colors.red('[Twitch Emotes] Failed to fetch emotes from Better Twitch TV'));
+				}
+			}
 
-				fs.writeFile('./../emotes.json', JSON.stringify(twitchEmotes), function (err) {
+			request('https://twitchemotes.com/api_cache/v3/subscriber.json', function (error, response, body) {
+				if (error) {
+					console.log(colors.red('[Twitch Emotes] Failed to load sub emotes from twitchemotes.com'));
+				}
+				else {
+					/** @type {{emotes: []}} */
+					try {
+						var subEmotes = JSON.parse(body);
+						Object.keys(subEmotes).forEach(function (key) {
+							subEmotes[key].emotes.forEach(function (emote) {
+								twitchEmotes[emote.code] = {
+									twitch: true,
+									id: emote.id
+								};
+							});
+						});
+					}
+					catch (e) {
+						console.log(colors.red('[Twitch Emotes] Failed to load sub emotes from twitchemotes.com'));
+					}
+				}
+
+				fs.writeFile(__dirname + '/../emotes.json', JSON.stringify(twitchEmotes), function (err) {
 					if (err) {
+						console.log(colors.red('[Twitch Emotes] Failed to save emotes.json'));
 						throw err;
 					}
 
-					console.log('saved emotes');
+					console.log(colors.green('[Twitch Emotes] Saved to emotes.json'));
 				});
 			});
-
 		});
-
 	});
 }
 
-httpsServer.listen(3666, '0.0.0.0');
+// check and load users.json
+if (!fs.existsSync(__dirname + '/users.json')) {
+	fs.writeFileSync(__dirname + '/users.json', '{}');
+}
+
+var UserList = null;
+
+console.log('[Users] Load registered users...');
+try {
+	UserList = require('./users.json');
+	console.log(colors.green('[Users] Loaded ' + Object.keys(UserList).length + ' users'));
+}
+catch (e) {
+	console.log(colors.red('[Users] users.json are corrupted? ' + e.toString()));
+
+	if (readlineSync.keyInYNStrict(colors.red('[Users] Should re create users.json? (all users will deleted)'), {defaultInput: 'Y'})) {
+		fs.writeFileSync(__dirname + '/users.json', '{}', {
+			flag: 'w+'
+		});
+		UserList = {};
+	}
+	else {
+		console.log('Closed Chat Server.');
+		process.exit();
+	}
+}
+
 io.sockets.on('connection', function (socket) {
 	var username = '';
 
