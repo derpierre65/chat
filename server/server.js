@@ -52,7 +52,7 @@ else {
 					console.log('failed get subscriber emotes');
 					return;
 				}
-
+				/** @type {{emotes: []}} */
 				var subEmotes = JSON.parse(body);
 				Object.keys(subEmotes).forEach(function (key) {
 					subEmotes[key].emotes.forEach(function (emote) {
@@ -81,14 +81,19 @@ httpsServer.listen(3666, '0.0.0.0');
 io.sockets.on('connection', function (socket) {
 	var username = '';
 
-	if (!util.isObject(socket.handshake) || !util.isObject(socket.handshake.query) || !util.isString(socket.handshake.query.username) || !socket.handshake.query.username.length) {
+	if (
+		!util.isObject(socket.handshake) ||
+		!util.isObject(socket.handshake.query) ||
+		!util.isString(socket.handshake.query.username) ||
+		!socket.handshake.query.username.length
+	) {
 		socket.disconnect();
 
 		return;
 	}
 	username = socket.handshake.query.username;
 
-	var userHash = (md5('schule' + (new Date()).getTime() + 'ist-kaka')).substr(0, 8);
+	var userHash = (md5('super-' + (new Date()).getTime() + '-secret-key')).substr(0, 8);
 
 	socket.emit('messages', savedMessages, usernames);
 	io.emit('newUser', userHash, username);

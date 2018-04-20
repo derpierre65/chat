@@ -1,0 +1,21 @@
+{
+  "name": "socket-chat",
+  "version": "1.0.0",
+  "description": "An Chat of Socket.IO basis.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derpierre65/chat.git"
+  },
+  "author": "derpierre65",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/derpierre65/chat/issues"
+  },
+  "homepage": "https://github.com/derpierre65/chat#readme",
+  "dependencies": {
+    "md5": "^2.2.1"
+  }
+}

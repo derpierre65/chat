@@ -130,25 +130,24 @@ $(function () {
 	}
 
 	function serverStatus(online) {
-		var rC = 'offline', aC = 'online', text = 'Online';
+		var removeClass = 'offline', addClass = 'online', text = 'Online';
 		if (!online) {
-			rC   = 'online';
-			aC   = 'offline';
-			text = 'Offline';
+			removeClass = 'online';
+			addClass    = 'offline';
+			text        = 'Offline';
 		}
 
-		$('#status').removeClass(rC).addClass(aC).html(text);
+		$('#status').removeClass(removeClass).addClass(addClass).html(text);
 	}
 
-    function urlParam(param,name){
-        var results = new RegExp('[\?&]' + param + '=([^&#]*)').exec(name);
-        if (results==null){
-            return null;
-        }
-        else{
-            return decodeURI(results[1]) || 0;
-        }
-    }
+	function urlParam(param, name) {
+		var results = new RegExp('[\?&]' + param + '=([^&#]*)').exec(name);
+		if (results == null) {
+			return null;
+		}
+
+		return decodeURI(results[1]) || 0;
+	}
 
 	socket
 		.on('connect', function () {
@@ -228,11 +227,12 @@ $(function () {
 				newMessage({
 					text: '/nick [Name] - änderte den Nicknamen.'
 				});
-
-				return;
 			}
 
-			socket.emit('chat', text);
+			if (text.substr(0, 1) !== '/') {
+				socket.emit('chat', text);
+			}
+
 			box.val('');
 		}
 	};
@@ -276,203 +276,206 @@ $(function () {
 			dl.append($('<dd />').append($element));
 		};
 
-        bbcodeMethod(bbcode);
+		bbcodeMethod(bbcode);
 
-        function bbcodeMethod(bbcode) {
-            switch (bbcode) {
-                case 'italic':
-                case 'under':
-                case 'crossed':
-                case 'bold': {
-                    addField({
-                        title: 'Text',
-                        name: 'text',
-                        type: 'text'
-                    });
+		function bbcodeMethod(bbcode) {
+			switch (bbcode) {
+				case 'italic':
+				case 'under':
+				case 'crossed':
+				case 'bold': {
+					addField({
+						title: 'Text',
+						name: 'text',
+						type: 'text'
+					});
 
-                    // get tag name
-                    var tag = 'b';
-                    switch (bbcode) {
-                        case 'italic':
-                            tag = 'i';
-                            break;
-                        case 'crossed':
-                            tag = 's';
-                            break;
-                        case 'under':
-                            tag = 'u';
-                            break;
-                    }
+					// get tag name
+					var tag = 'b';
+					switch (bbcode) {
+						case 'italic':
+							tag = 'i';
+							break;
+						case 'crossed':
+							tag = 's';
+							break;
+						case 'under':
+							tag = 'u';
+							break;
+					}
 
-                    modalFunction = function () {
-                        return '[' + tag + ']' + $('#bbcode-input-text').val() + '[/' + tag + ']';
-                    };
+					modalFunction = function () {
+						return '[' + tag + ']' + $('#bbcode-input-text').val() + '[/' + tag + ']';
+					};
 
-                    break;
-                }
-                case 'img': {
-                    addField({
-                        title: 'Link des Bildes',
-                        name: 'imageurl',
-                        type: 'text'
-                    });
+					break;
+				}
+				case 'img': {
+					addField({
+						title: 'Link des Bildes',
+						name: 'imageurl',
+						type: 'text'
+					});
 
-                    modalFunction = function () {
-                        var link = $('#bbcode-input-imageurl').val();
-                        if (!link.length) {
-                            return false;
-                        }
+					modalFunction = function () {
+						var link = $('#bbcode-input-imageurl').val();
+						if (!link.length) {
+							return false;
+						}
 
-                        return '[img]' + link + '[/img]';
-                    };
-                    break;
-                }
-                case 'url': {
-                    addField({
-                        title: 'Anzeigetext (optional)',
-                        name: 'showtext',
-                        type: 'text'
-                    });
-                    addField({
-                        title: 'Link',
-                        name: 'link',
-                        type: 'text'
-                    });
+						return '[img]' + link + '[/img]';
+					};
+					break;
+				}
+				case 'url': {
+					addField({
+						title: 'Anzeigetext (optional)',
+						name: 'showtext',
+						type: 'text'
+					});
+					addField({
+						title: 'Link',
+						name: 'link',
+						type: 'text'
+					});
 
-                    modalFunction = function () {
-                        var showtext = $('#bbcode-input-showtext').val().trim();
-                        var link     = $('#bbcode-input-link').val().trim();
-                        var type = '';
-                        var encTypeDetect = link.substr(link.length - 4);
-                        var vidArray = ['webm', '.mp4', '.ogg'];
-                        var isEncVideo = inHaystack(encTypeDetect,vidArray);
-                        if (!link.length) {
-                            return false;
-                        }
-                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)|| inHaystack('open.spotify.com/',link)) {
-                            if ( link.indexOf('twitch.tv/') >= 0) {
-                                type = 3;
-                            } else if ( link.indexOf('youtube.com/') >= 0) {
-                                type = 4;
-                            } else if ( inHaystack('open.spotify.com/',link)) {
-                                type = 5;
-                            } else {
-                            	type = 0;
+					modalFunction = function () {
+						var showtext      = $('#bbcode-input-showtext').val().trim();
+						var link          = $('#bbcode-input-link').val().trim();
+						var type          = '';
+						var encTypeDetect = link.substr(link.length - 4);
+						var vidArray      = [
+							'webm',
+							'.mp4',
+							'.ogg'
+						];
+						var isEncVideo    = inHaystack(encTypeDetect, vidArray);
+						if (!link.length) {
+							return false;
+						}
+						if (isEncVideo || inHaystack('twitch.tv/', link) || inHaystack('youtube.com/', link) || inHaystack('open.spotify.com/', link)) {
+							if (link.indexOf('twitch.tv/') >= 0) {
+								type = 3;
+							}
+							else if (link.indexOf('youtube.com/') >= 0) {
+								type = 4;
+							}
+							else if (inHaystack('open.spotify.com/', link)) {
+								type = 5;
+							}
+							else {
+								type = 0;
 							}
 
-                            return mediaBBCode(link,type);
-                        }
-                        if (showtext.length) {
-                            return '[url=' + link + ']' + showtext + '[/url]';
-                        }
+							return mediaBBCode(link, type);
+						}
+						if (showtext.length) {
+							return '[url=' + link + ']' + showtext + '[/url]';
+						}
 
-                        return '[url]' + link + '[/url]';
-                    };
-                    break;
-                }
-                case 'video': {
-                    addField({
-                        title: 'Typ (optional)',
-                        name: 'type',
-                        type: 'select',
-                        options: {
-                            0: 'Automatisch',
-                            1: 'MP 4',
-                            2: 'OGG',
-                            3: 'Twitch Clip',
-                            4: 'YouTube'
-                        }
-                    });
-                    addField({
-                        title: 'Link',
-                        name: 'link',
-                        type: 'text'
-                    });
+						return '[url]' + link + '[/url]';
+					};
+					break;
+				}
+				case 'video': {
+					addField({
+						title: 'Typ (optional)',
+						name: 'type',
+						type: 'select',
+						options: {
+							0: 'Automatisch',
+							1: 'MP 4',
+							2: 'OGG',
+							3: 'Twitch Clip',
+							4: 'YouTube'
+						}
+					});
+					addField({
+						title: 'Link',
+						name: 'link',
+						type: 'text'
+					});
 
-                    modalFunction = function () {
-                        var link    = $('#bbcode-input-link').val().trim();
-                        var type    = parseInt($('#bbcode-input-type').val());
-                        if (!link.length) {
-                            return false;
-                        }
+					modalFunction = function () {
+						var link = $('#bbcode-input-link').val().trim();
+						var type = parseInt($('#bbcode-input-type').val());
+						if (!link.length) {
+							return false;
+						}
 
-                        if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
-                            type = 3;
-                        }
-                        if (type === 0 && link.indexOf('youtube.com/') >= 0) {
-                            type = 4;
-                        }
-                        if ( inHaystack('open.spotify.com/',link)) {
-                            type = 5;
-                        }
-                        return mediaBBCode(link,type);
+						if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
+							type = 3;
+						}
+						if (type === 0 && link.indexOf('youtube.com/') >= 0) {
+							type = 4;
+						}
+						if (inHaystack('open.spotify.com/', link)) {
+							type = 5;
+						}
+						return mediaBBCode(link, type);
 
-                    };
+					};
 
-                    break;
-                }
-            }
-        }
-
+					break;
+				}
+			}
+		}
 
 		$('.modal-title').html(bbcode);
 		$('.modal-body').html(dl);
 		$('.modal').modal();
 	});
 
-	function mediaBBCode(link,type) {
-        if (type === 0) {
-            encType = link.substr(link.length - 3);
-            if(encType = 'ebm') {
-                encTypetemp = link.substr(link.length - 4);
-                if(encTypetemp = '.webm') {
-                    encType = 'webm';
+	function mediaBBCode(link, type) {
+		if (type === 0) {
+			encType = link.substr(link.length - 3);
+			if (encType = 'ebm') {
+				encTypetemp = link.substr(link.length - 4);
+				if (encTypetemp = '.webm') {
+					encType = 'webm';
 				}
-            }
-        }
-        else if (type === 1) {
-            encType = 'mp4';
-        }
-        else if (type === 2) {
-            encType = 'ogg';
-        }
-        else if (type === 3) {
-            var twitchPosition = link.indexOf('twitch.tv/');
-            if (twitchPosition >= 0) {
-            	if(link.indexOf('twitch.tv/videos/')) {
-                    link = link.substr(twitchPosition + 'twitch.tv/videos/'.length);
-                    return '[twitch-video]' + link + '[/twitch-video]';
-				}
-                link = link.substr(twitchPosition + 'twitch.tv/'.length);
-            }
-
-            return '[twitch-clip]' + link + '[/twitch-clip]';
-        }else if (type === 4) {
-            var youtubePosition = link.indexOf('youtube.com/');
-            if (youtubePosition >= 0) {
-                link = link.substr(youtubePosition + 'youtube.com/'.length);
-            }
-
-            return '[youtube]' + urlParam('v',link) + '[/youtube]';
-        }else if (type === 5) {
-            var spotifyPosition = link.indexOf('open.spotify.com/');
-            if (spotifyPosition >= 0) {
-                link = link.substr(spotifyPosition + 'open.spotify.com/'.length);
-            }
-
-            return '[spotify]' + link + '[/spotify]';
-        }
-
-        return '[video=' + encType + ']' + link + '[/video]';
-	}
-
-	function inHaystack(needle,haystack) {
-		if(haystack.indexOf(needle) >= 0) {
-			return true;
-		} else {
-			return false;
+			}
 		}
+		else if (type === 1) {
+			encType = 'mp4';
+		}
+		else if (type === 2) {
+			encType = 'ogg';
+		}
+		else if (type === 3) {
+			var twitchPosition = link.indexOf('twitch.tv/');
+			if (twitchPosition >= 0) {
+				if (link.indexOf('twitch.tv/videos/')) {
+					link = link.substr(twitchPosition + 'twitch.tv/videos/'.length);
+					return '[twitch-video]' + link + '[/twitch-video]';
+				}
+				link = link.substr(twitchPosition + 'twitch.tv/'.length);
+			}
+
+			return '[twitch-clip]' + link + '[/twitch-clip]';
+		} else if (type === 4) {
+			var youtubePosition = link.indexOf('youtube.com/');
+			if (youtubePosition >= 0) {
+				link = link.substr(youtubePosition + 'youtube.com/'.length);
+			}
+
+			return '[youtube]' + urlParam('v', link) + '[/youtube]';
+		} else if (type === 5) {
+			var spotifyPosition = link.indexOf('open.spotify.com/');
+			if (spotifyPosition >= 0) {
+				link = link.substr(spotifyPosition + 'open.spotify.com/'.length);
+			}
+
+			return '[spotify]' + link + '[/spotify]';
+		}
+
+		return '[video=' + encType + ']' + link + '[/video]';
 	}
+
+	function inHaystack(needle, haystack) {
+		return haystack.indexOf(needle) >= 0;
+	}
+
 	$('.btn-paste').on('click', function () {
 		var text = modalFunction();
 		if (text !== false) {
