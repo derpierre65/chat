@@ -92,10 +92,12 @@ $(function () {
 		str     = str.replace(/\[url=(.+?)\](.+?)\[\/url\]/g, '<a target="_blank" href="$1">$2</a>');
 		str     = str.replace(/\[u\](.+?)\[\/u\]/g, '<u>$1</u>');
 		str     = str.replace(/\[i\](.+?)\[\/i\]/g, '<i>$1</i>');
-		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
-		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
-		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<img src="$1" style="max-width: 300px;" />');
-		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
+		str     = str.replace(/\[twitch-clip\](.+?)\[\/twitch-clip\]/g, '<br/><iframe src="https://clips.twitch.tv/embed?clip=$1&autoplay=false&tt_medium=clips_embed" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>');
+		str     = str.replace(/\[twitch-video\](.+?)\[\/twitch-video\]/g, '<br/><iframe src="https://player.twitch.tv/?autoplay=false&video=v$1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="640"></iframe>');
+		str     = str.replace(/\[youtube\](.+?)\[\/youtube\]/g, '<br/><iframe width="640" height="360" src="https://www.youtube.com/embed/$1?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
+		str     = str.replace(/\[spotify\](.+?)\[\/spotify\]/g, '<br/><iframe src="https://open.spotify.com/embed/$1" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>');
+		str     = str.replace(/\[img\](.+?)\[\/img\]/g, '<br/><img src="$1" style="max-width: 300px;" />');
+		str     = str.replace(/\[video=(.+?)\](.+?)\[\/video\]/g, '<br/><video style="max-width: 300px;" controls><source src="$2" type="video/$1"></video>');
 
 		// <video width="320" height="240" controls>
 		// <source src="movie.mp4" type="video/mp4">
@@ -274,150 +276,203 @@ $(function () {
 			dl.append($('<dd />').append($element));
 		};
 
-		switch (bbcode) {
-			case 'italic':
-			case 'under':
-			case 'crossed':
-			case 'bold': {
-				addField({
-					title: 'Text',
-					name: 'text',
-					type: 'text'
-				});
+        bbcodeMethod(bbcode);
 
-				// get tag name
-				var tag = 'b';
-				switch (bbcode) {
-					case 'italic':
-						tag = 'i';
-						break;
-					case 'crossed':
-						tag = 's';
-						break;
-					case 'under':
-						tag = 'u';
-						break;
-				}
+        function bbcodeMethod(bbcode) {
+            switch (bbcode) {
+                case 'italic':
+                case 'under':
+                case 'crossed':
+                case 'bold': {
+                    addField({
+                        title: 'Text',
+                        name: 'text',
+                        type: 'text'
+                    });
 
-				modalFunction = function () {
-					return '[' + tag + ']' + $('#bbcode-input-text').val() + '[/' + tag + ']';
-				};
+                    // get tag name
+                    var tag = 'b';
+                    switch (bbcode) {
+                        case 'italic':
+                            tag = 'i';
+                            break;
+                        case 'crossed':
+                            tag = 's';
+                            break;
+                        case 'under':
+                            tag = 'u';
+                            break;
+                    }
 
-				break;
-			}
-			case 'img': {
-				addField({
-					title: 'Link des Bildes',
-					name: 'imageurl',
-					type: 'text'
-				});
+                    modalFunction = function () {
+                        return '[' + tag + ']' + $('#bbcode-input-text').val() + '[/' + tag + ']';
+                    };
 
-				modalFunction = function () {
-					var link = $('#bbcode-input-imageurl').val();
-					if (!link.length) {
-						return false;
-					}
+                    break;
+                }
+                case 'img': {
+                    addField({
+                        title: 'Link des Bildes',
+                        name: 'imageurl',
+                        type: 'text'
+                    });
 
-					return '[img]' + link + '[/img]';
-				};
-				break;
-			}
-			case 'url': {
-				addField({
-					title: 'Anzeigetext (optional)',
-					name: 'showtext',
-					type: 'text'
-				});
-				addField({
-					title: 'Link',
-					name: 'link',
-					type: 'text'
-				});
+                    modalFunction = function () {
+                        var link = $('#bbcode-input-imageurl').val();
+                        if (!link.length) {
+                            return false;
+                        }
 
-				modalFunction = function () {
-					var showtext = $('#bbcode-input-showtext').val().trim();
-					var link     = $('#bbcode-input-link').val().trim();
-					if (!link.length) {
-						return false;
-					}
+                        return '[img]' + link + '[/img]';
+                    };
+                    break;
+                }
+                case 'url': {
+                    addField({
+                        title: 'Anzeigetext (optional)',
+                        name: 'showtext',
+                        type: 'text'
+                    });
+                    addField({
+                        title: 'Link',
+                        name: 'link',
+                        type: 'text'
+                    });
 
-					if (showtext.length) {
-						return '[url=' + link + ']' + showtext + '[/url]';
-					}
+                    modalFunction = function () {
+                        var showtext = $('#bbcode-input-showtext').val().trim();
+                        var link     = $('#bbcode-input-link').val().trim();
+                        var type = '';
+                        var encTypeDetect = link.substr(link.length - 4);
+                        var vidArray = ['webm', '.mp4', '.ogg'];
+                        var isEncVideo = inHaystack(encTypeDetect,vidArray);
+                        if (!link.length) {
+                            return false;
+                        }
+                        if (isEncVideo || inHaystack('twitch.tv/',link) || inHaystack('youtube.com/',link)|| inHaystack('open.spotify.com/',link)) {
+                            if ( link.indexOf('twitch.tv/') >= 0) {
+                                type = 3;
+                            } else if ( link.indexOf('youtube.com/') >= 0) {
+                                type = 4;
+                            } else if ( inHaystack('open.spotify.com/',link)) {
+                                type = 5;
+                            } else {
+                            	type = 0;
+							}
 
-					return '[url]' + link + '[/url]';
-				};
-				break;
-			}
-			case 'video': {
-				addField({
-					title: 'Typ (optional)',
-					name: 'type',
-					type: 'select',
-					options: {
-						0: 'Automatisch',
-						1: 'MP 4',
-						2: 'OGG',
-						3: 'Twitch Clip',
-						4: 'YouTube'
-					}
-				});
-				addField({
-					title: 'Link',
-					name: 'link',
-					type: 'text'
-				});
+                            return mediaBBCode(link,type);
+                        }
+                        if (showtext.length) {
+                            return '[url=' + link + ']' + showtext + '[/url]';
+                        }
 
-				modalFunction = function () {
-					var link    = $('#bbcode-input-link').val().trim();
-					var type    = parseInt($('#bbcode-input-type').val());
-					var encType = '';
-					if (!link.length) {
-						return false;
-					}
+                        return '[url]' + link + '[/url]';
+                    };
+                    break;
+                }
+                case 'video': {
+                    addField({
+                        title: 'Typ (optional)',
+                        name: 'type',
+                        type: 'select',
+                        options: {
+                            0: 'Automatisch',
+                            1: 'MP 4',
+                            2: 'OGG',
+                            3: 'Twitch Clip',
+                            4: 'YouTube'
+                        }
+                    });
+                    addField({
+                        title: 'Link',
+                        name: 'link',
+                        type: 'text'
+                    });
 
-					if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
-						type = 3;
-					}
+                    modalFunction = function () {
+                        var link    = $('#bbcode-input-link').val().trim();
+                        var type    = parseInt($('#bbcode-input-type').val());
+                        if (!link.length) {
+                            return false;
+                        }
 
-					if (type === 0) {
-						encType = link.substr(link.length - 3);
-					}
-					else if (type === 1) {
-						encType = 'mp4';
-					}
-					else if (type === 2) {
-						encType = 'ogg';
-					}
-					else if (type === 3) {
-						var twitchPosition = link.indexOf('twitch.tv/');
-						alert(twitchPosition);
-						if (twitchPosition >= 0) {
-							link = link.substr(twitchPosition + 'twitch.tv/'.length);
-						}
+                        if (type === 0 && link.indexOf('twitch.tv/') >= 0) {
+                            type = 3;
+                        }
+                        if (type === 0 && link.indexOf('youtube.com/') >= 0) {
+                            type = 4;
+                        }
+                        if ( inHaystack('open.spotify.com/',link)) {
+                            type = 5;
+                        }
+                        return mediaBBCode(link,type);
 
-						return '[twitch-clip]' + link + '[/twitch-clip]';
-					}else if (type === 4) {
-						var youtubePosition = link.indexOf('youtube.com/');
-						alert(youtubePosition);
-						if (youtubePosition >= 0) {
-							link = link.substr(youtubePosition + 'youtube.com/'.length);
-						}
+                    };
 
-						return '[youtube]' + urlParam('v',link) + '[/youtube]';
-					}
+                    break;
+                }
+            }
+        }
 
-					return '[video=' + encType + ']' + link + '[/video]';
-				};
-
-				break;
-			}
-		}
 
 		$('.modal-title').html(bbcode);
 		$('.modal-body').html(dl);
 		$('.modal').modal();
 	});
+
+	function mediaBBCode(link,type) {
+        if (type === 0) {
+            encType = link.substr(link.length - 3);
+            if(encType = 'ebm') {
+                encTypetemp = link.substr(link.length - 4);
+                if(encTypetemp = '.webm') {
+                    encType = 'webm';
+				}
+            }
+        }
+        else if (type === 1) {
+            encType = 'mp4';
+        }
+        else if (type === 2) {
+            encType = 'ogg';
+        }
+        else if (type === 3) {
+            var twitchPosition = link.indexOf('twitch.tv/');
+            if (twitchPosition >= 0) {
+            	if(link.indexOf('twitch.tv/videos/')) {
+                    link = link.substr(twitchPosition + 'twitch.tv/videos/'.length);
+                    return '[twitch-video]' + link + '[/twitch-video]';
+				}
+                link = link.substr(twitchPosition + 'twitch.tv/'.length);
+            }
+
+            return '[twitch-clip]' + link + '[/twitch-clip]';
+        }else if (type === 4) {
+            var youtubePosition = link.indexOf('youtube.com/');
+            if (youtubePosition >= 0) {
+                link = link.substr(youtubePosition + 'youtube.com/'.length);
+            }
+
+            return '[youtube]' + urlParam('v',link) + '[/youtube]';
+        }else if (type === 5) {
+            var spotifyPosition = link.indexOf('open.spotify.com/');
+            if (spotifyPosition >= 0) {
+                link = link.substr(spotifyPosition + 'open.spotify.com/'.length);
+            }
+
+            return '[spotify]' + link + '[/spotify]';
+        }
+
+        return '[video=' + encType + ']' + link + '[/video]';
+	}
+
+	function inHaystack(needle,haystack) {
+		if(haystack.indexOf(needle) >= 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	$('.btn-paste').on('click', function () {
 		var text = modalFunction();
 		if (text !== false) {
